@@ -42,7 +42,7 @@ jobs:
           mv Amethyst-iOS.ipa output/
 
       - name: Upload IPA
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: amethyst-ios
           path: output/Amethyst-iOS.ipa
