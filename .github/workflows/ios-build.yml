@@ -1,0 +1,48 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Install dependencies
+        run: |
+          brew install cmake
+          brew install ninja
+          brew install python
+
+      - name: Configure build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build app
+        run: |
+          cd build
+          ninja
+
+      - name: Package IPA
+        run: |
+          mkdir Payload
+          cp -r build/Amethyst.app Payload/
+          zip -r Amethyst-iOS.ipa Payload
+          mkdir -p output
+          mv Amethyst-iOS.ipa output/
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: amethyst-ios
+          path: output/Amethyst-iOS.ipa
