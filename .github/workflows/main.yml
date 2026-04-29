@@ -1,0 +1,43 @@
+name: Build Amethyst iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          brew install cmake ninja python3
+
+      - name: Build iOS native libraries
+        run: |
+          cd ios
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Build Xcode archive
+        run: |
+          xcodebuild -workspace Amethyst.xcworkspace \
+            -scheme Amethyst \
+            -configuration Release \
+            -archivePath build/Amethyst.xcarchive \
+            archive
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/Amethyst.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist ios/exportOptions.plist
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: Amethyst-iOS
+          path: build/*.ipa
